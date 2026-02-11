@@ -77,6 +77,10 @@ When you want to forcefully reload, for example to reset the state of your app, 
 
 You've successfully run and modified your React Native App. :partying_face:
 
+<img width="300" height="650" alt="Screenshot from 2026-02-11 21-04-31" src="https://github.com/user-attachments/assets/98cc0608-0d0c-4327-9526-192d7878e7b2" />
+
+
+
 ### Now what?
 
 - If you want to add this new React Native code to an existing application, check out the [Integration guide](https://reactnative.dev/docs/integration-with-existing-apps).
