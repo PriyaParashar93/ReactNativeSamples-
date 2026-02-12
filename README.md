@@ -66,7 +66,7 @@ This is one way to run your app — you can also build it directly from Android 
 
 Now that you have successfully run the app, let's make changes!
 
-Open `App.tsx` in your text editor of choice and make some changes. When you save, your app will automatically update and reflect these changes — this is powered by [Fast Refresh](https://reactnative.dev/docs/fast-refresh).
+Open `AlignmentScreen.tsx` in your text editor of choice and make some changes. When you save, your app will automatically update and reflect these changes — this is powered by [Fast Refresh](https://reactnative.dev/docs/fast-refresh).
 
 When you want to forcefully reload, for example to reset the state of your app, you can perform a full reload:
 
@@ -76,8 +76,8 @@ When you want to forcefully reload, for example to reset the state of your app, 
 ## Congratulations! :tada:
 
 You've successfully run and modified your React Native App. :partying_face:
+<img width="232" height="492" alt="Screenshot from 2026-02-12 13-34-27" src="https://github.com/user-attachments/assets/574ea962-b580-4ffb-8721-bb0671773b72" />
 
-<img width="300" height="650" alt="Screenshot from 2026-02-11 21-04-31" src="https://github.com/user-attachments/assets/98cc0608-0d0c-4327-9526-192d7878e7b2" />
 
 
 
