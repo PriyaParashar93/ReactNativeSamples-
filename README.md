@@ -76,8 +76,7 @@ When you want to forcefully reload, for example to reset the state of your app, 
 ## Congratulations! :tada:
 
 You've successfully run and modified your React Native App. :partying_face:
-
-<img width="300" height="650" alt="Screenshot from 2026-02-11 21-04-31" src="https://github.com/user-attachments/assets/98cc0608-0d0c-4327-9526-192d7878e7b2" />
+<img width="301" height="653" alt="Screenshot from 2026-02-12 20-50-07" src="https://github.com/user-attachments/assets/09bc9e37-4e26-4a8c-8596-cc26b9ef677c" />
 
 
 
