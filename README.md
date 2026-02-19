@@ -1,101 +1,45 @@
-This is a new [**React Native**](https://reactnative.dev) project, bootstrapped using [`@react-native-community/cli`](https://github.com/react-native-community/cli).
+This Branch demonstrates navigation patterns and mock API integration in a React Native application.
 
-# Getting Started
+🚀 Features
+🔹 Navigation 
+1. Bottom Tab Navigation
+Home
+Profile
+and Other
 
-> **Note**: Make sure you have completed the [Set Up Your Environment](https://reactnative.dev/docs/set-up-your-environment) guide before proceeding.
+2. Drawer Navigation
+Setting
+Profile
 
-## Step 1: Start Metro
+3. Stack Navigation
+profile Detail
 
-First, you will need to run **Metro**, the JavaScript build tool for React Native.
+Profile screen is accessible from both Drawer and Bottom Bar.
 
-To start the Metro dev server, run the following command from the root of your React Native project:
+🔹 Home Screen
+Fetches and displays list of posts.
+Each post navigates to Post Detail Screen.
+Comments are fetched and displayed for selected post.
 
-```sh
-# Using npm
-npm start
+🔹 Post Detail Screen
+Shows post details.
+Displays comments related to the selected post.
 
-# OR using Yarn
-yarn start
-```
+🔹 Settings Screen
+Contains FAQ and Log out to show a dialog
 
-## Step 2: Build and run your app
+Displays dialog components (e.g., confirmation / info dialogs).
 
-With Metro running, open a new terminal window/pane from the root of your React Native project, and use one of the following commands to build and run your Android or iOS app:
+🌐 API Integration
+Mock APIs are used from:
+👉 https://jsonplaceholder.typicode.com/
 
-### Android
+APIs Used
+GET /posts → Fetch post list (Home Screen)
+GET /comments?postId={id} → Fetch comments (Post Detail Screen)
 
-```sh
-# Using npm
-npm run android
+These APIs are used to simulate real-world post listing and comment functionality.
 
-# OR using Yarn
-yarn android
-```
+Sample video of this branch
+[Screencast from 20-02-26 01:56:39 AM IST.webm](https://github.com/user-attachments/assets/462552bb-ff25-4897-9741-58638100c1d7)
 
-### iOS
-
-For iOS, remember to install CocoaPods dependencies (this only needs to be run on first clone or after updating native deps).
-
-The first time you create a new project, run the Ruby bundler to install CocoaPods itself:
-
-```sh
-bundle install
-```
-
-Then, and every time you update your native dependencies, run:
-
-```sh
-bundle exec pod install
-```
-
-For more information, please visit [CocoaPods Getting Started guide](https://guides.cocoapods.org/using/getting-started.html).
-
-```sh
-# Using npm
-npm run ios
-
-# OR using Yarn
-yarn ios
-```
-
-If everything is set up correctly, you should see your new app running in the Android Emulator, iOS Simulator, or your connected device.
-
-This is one way to run your app — you can also build it directly from Android Studio or Xcode.
-
-## Step 3: Modify your app
-
-Now that you have successfully run the app, let's make changes!
-
-Open `App.tsx` in your text editor of choice and make some changes. When you save, your app will automatically update and reflect these changes — this is powered by [Fast Refresh](https://reactnative.dev/docs/fast-refresh).
-
-When you want to forcefully reload, for example to reset the state of your app, you can perform a full reload:
-
-- **Android**: Press the <kbd>R</kbd> key twice or select **"Reload"** from the **Dev Menu**, accessed via <kbd>Ctrl</kbd> + <kbd>M</kbd> (Windows/Linux) or <kbd>Cmd ⌘</kbd> + <kbd>M</kbd> (macOS).
-- **iOS**: Press <kbd>R</kbd> in iOS Simulator.
-
-## Congratulations! :tada:
-
-You've successfully run and modified your React Native App. :partying_face:
-
-<img width="300" height="650" alt="Screenshot from 2026-02-11 21-04-31" src="https://github.com/user-attachments/assets/98cc0608-0d0c-4327-9526-192d7878e7b2" />
-
-
-
-### Now what?
-
-- If you want to add this new React Native code to an existing application, check out the [Integration guide](https://reactnative.dev/docs/integration-with-existing-apps).
-- If you're curious to learn more about React Native, check out the [docs](https://reactnative.dev/docs/getting-started).
-
-# Troubleshooting
-
-If you're having issues getting the above steps to work, see the [Troubleshooting](https://reactnative.dev/docs/troubleshooting) page.
-
-# Learn More
-
-To learn more about React Native, take a look at the following resources:
-
-- [React Native Website](https://reactnative.dev) - learn more about React Native.
-- [Getting Started](https://reactnative.dev/docs/environment-setup) - an **overview** of React Native and how setup your environment.
-- [Learn the Basics](https://reactnative.dev/docs/getting-started) - a **guided tour** of the React Native **basics**.
-- [Blog](https://reactnative.dev/blog) - read the latest official React Native **Blog** posts.
-- [`@facebook/react-native`](https://github.com/facebook/react-native) - the Open Source; GitHub **repository** for React Native.
