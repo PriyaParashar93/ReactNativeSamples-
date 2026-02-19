@@ -6,9 +6,12 @@ type Props = {
   username: string;
   userImage: string;
   postImage: string;
+  title?: string;
+  body?: string;
+  onPress?: () => void;
 };
 
-const PostItem: React.FC<Props> = ({ username, userImage, postImage }) => {
+const PostItem: React.FC<Props> = ({ username, userImage, postImage, title, body, onPress }) => {
   return (
     <View style={styles.container}>
       {/* Header */}
@@ -24,7 +27,9 @@ const PostItem: React.FC<Props> = ({ username, userImage, postImage }) => {
       </View>
 
       {/* Post Image */}
-      <Image source={{ uri: postImage }} style={styles.postImage} />
+      <TouchableOpacity activeOpacity={0.9} onPress={onPress} disabled={!onPress}>
+        <Image source={{ uri: postImage }} style={styles.postImage} />
+      </TouchableOpacity>
 
       {/* Actions */}
       <View style={styles.actionRow}>
@@ -52,20 +57,20 @@ const PostItem: React.FC<Props> = ({ username, userImage, postImage }) => {
         Les gusta a <Text style={styles.bold}>Neoland</Text> y más personas
       </Text>
 
-      {/* Comment Text */}
-      <Text style={styles.commentText}>Ver los 3 comentarios</Text>
+      {/* Post title & body from API */}
+      {title ? (
+        <Text style={styles.captionText} numberOfLines={2}>
+          <Text style={styles.bold}>{username} </Text>
+          {title}
+        </Text>
+      ) : null}
+      {body ? (
+        <Text style={styles.bodyText} numberOfLines={3}>
+          {body}
+        </Text>
+      ) : null}
 
-      {/* Add Comment */}
-      <View style={styles.addCommentRow}>
-        <Image source={{ uri: userImage }} style={styles.commentAvatar} />
-        <Text style={styles.addComment}>Añade un comentario...</Text>
-
-        <View style={styles.emojiRow}>
-          <Text style={styles.emoji}>👌</Text>
-          <Text style={styles.emoji}>😍</Text>
-          <Text style={styles.emoji}>+</Text>
-        </View>
-      </View>
+  
 
       {/* Time */}
       <Text style={styles.timeText}>Hace 2 días</Text>
@@ -131,6 +136,20 @@ const styles = StyleSheet.create({
   },
   bold: {
     fontWeight: "bold",
+  },
+  captionText: {
+    paddingHorizontal: 12,
+    paddingTop: 6,
+    fontSize: 13,
+    color: "#111",
+    lineHeight: 18,
+  },
+  bodyText: {
+    paddingHorizontal: 12,
+    paddingTop: 3,
+    fontSize: 12,
+    color: "#555",
+    lineHeight: 17,
   },
   commentText: {
     paddingHorizontal: 12,
