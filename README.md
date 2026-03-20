@@ -1,101 +1,52 @@
-This is a new [**React Native**](https://reactnative.dev) project, bootstrapped using [`@react-native-community/cli`](https://github.com/react-native-community/cli).
+# Redux, Zustand & State Management
 
-# Getting Started
+ ## Tasks Completed
 
-> **Note**: Make sure you have completed the [Set Up Your Environment](https://reactnative.dev/docs/set-up-your-environment) guide before proceeding.
+ ### 1. Redux Toolkit Integration
+  - Configured Redux store using @reduxjs/toolkit at src/store/store.ts
+  - Wrapped the app with <Provider> in index.js
 
-## Step 1: Start Metro
+###  2. Post Slice (postSlice)
+  - Async thunks: fetchPosts and fetchComments from JSONPlaceholder API
+  - Reducers: toggleLike, toggleSave, addComment, initLikeCount
+  - Selectors: selectAllPosts, selectIsLiked, selectIsSaved, selectLikeCount, selectSavedPostsCount, etc.
+  - Manages: posts list, loading/error states, liked/saved posts, like counts, and comments
 
-First, you will need to run **Metro**, the JavaScript build tool for React Native.
+###  3. Zustand Store (usePostInteractionStore)
+  - Bookmark collections system with addToCollection, removeFromCollection, createCollection
+  - Default "All Posts" collection
+  - getTotalSavedCount using Set-based deduplication across collections
+  - isPostInCollection checker
 
-To start the Metro dev server, run the following command from the root of your React Native project:
+###  4. Feed Screen with Redux
+  - FeedScreen fetches posts via dispatch(fetchPosts()) on mount
+  - Handles loading spinner and error states
+  - Each PostItem uses Redux for like/save state and Zustand for bookmark collections
 
-```sh
-# Using npm
-npm start
+##  5. Post Detail Screen
+  - Displays full post with comments fetched from API via fetchComments
+  - Like, save, and comment functionality wired to Redux
+  - Add local comments with addComment action
+  - Keyboard-aware input with auto-scroll to latest comment
 
-# OR using Yarn
-yarn start
-```
+ ### 6. Navigation & Screen Architecture
+  - BottomTab component with 5 tabs: Home, Reels, New Post, Search, Profile
+  - HomeScreen manages screen routing with animated side drawer
+  - Drawer navigation to Profile and Settings screens
+  - Tab-to-screen mapping with header updates
 
-## Step 2: Build and run your app
+ ### 7. Profile Screen
+  - Instagram-style profile layout with avatar, stats (posts, followers, following)
+  - Story highlights section with "New" highlight option
+  - Grid/Reels/Tagged tab selector
+  - Photo grid with pin and video overlays
+  - Saved count from Zustand store
 
-With Metro running, open a new terminal window/pane from the root of your React Native project, and use one of the following commands to build and run your Android or iOS app:
+ ### 8. Settings Screen
+  - Navigation to Profile from Settings
 
-### Android
+###  Packages Added
 
-```sh
-# Using npm
-npm run android
-
-# OR using Yarn
-yarn android
-```
-
-### iOS
-
-For iOS, remember to install CocoaPods dependencies (this only needs to be run on first clone or after updating native deps).
-
-The first time you create a new project, run the Ruby bundler to install CocoaPods itself:
-
-```sh
-bundle install
-```
-
-Then, and every time you update your native dependencies, run:
-
-```sh
-bundle exec pod install
-```
-
-For more information, please visit [CocoaPods Getting Started guide](https://guides.cocoapods.org/using/getting-started.html).
-
-```sh
-# Using npm
-npm run ios
-
-# OR using Yarn
-yarn ios
-```
-
-If everything is set up correctly, you should see your new app running in the Android Emulator, iOS Simulator, or your connected device.
-
-This is one way to run your app — you can also build it directly from Android Studio or Xcode.
-
-## Step 3: Modify your app
-
-Now that you have successfully run the app, let's make changes!
-
-Open `App.tsx` in your text editor of choice and make some changes. When you save, your app will automatically update and reflect these changes — this is powered by [Fast Refresh](https://reactnative.dev/docs/fast-refresh).
-
-When you want to forcefully reload, for example to reset the state of your app, you can perform a full reload:
-
-- **Android**: Press the <kbd>R</kbd> key twice or select **"Reload"** from the **Dev Menu**, accessed via <kbd>Ctrl</kbd> + <kbd>M</kbd> (Windows/Linux) or <kbd>Cmd ⌘</kbd> + <kbd>M</kbd> (macOS).
-- **iOS**: Press <kbd>R</kbd> in iOS Simulator.
-
-## Congratulations! :tada:
-
-You've successfully run and modified your React Native App. :partying_face:
-
-<img width="300" height="650" alt="Screenshot from 2026-02-11 21-04-31" src="https://github.com/user-attachments/assets/98cc0608-0d0c-4327-9526-192d7878e7b2" />
-
-
-
-### Now what?
-
-- If you want to add this new React Native code to an existing application, check out the [Integration guide](https://reactnative.dev/docs/integration-with-existing-apps).
-- If you're curious to learn more about React Native, check out the [docs](https://reactnative.dev/docs/getting-started).
-
-# Troubleshooting
-
-If you're having issues getting the above steps to work, see the [Troubleshooting](https://reactnative.dev/docs/troubleshooting) page.
-
-# Learn More
-
-To learn more about React Native, take a look at the following resources:
-
-- [React Native Website](https://reactnative.dev) - learn more about React Native.
-- [Getting Started](https://reactnative.dev/docs/environment-setup) - an **overview** of React Native and how setup your environment.
-- [Learn the Basics](https://reactnative.dev/docs/getting-started) - a **guided tour** of the React Native **basics**.
-- [Blog](https://reactnative.dev/blog) - read the latest official React Native **Blog** posts.
-- [`@facebook/react-native`](https://github.com/facebook/react-native) - the Open Source; GitHub **repository** for React Native.
+  - @reduxjs/toolkit
+  - react-redux
+  - zustand
