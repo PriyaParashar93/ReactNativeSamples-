@@ -1,101 +1,46 @@
-This is a new [**React Native**](https://reactnative.dev) project, bootstrapped using [`@react-native-community/cli`](https://github.com/react-native-community/cli).
+** Camera, Gallery Integration & Redux Persistence**
 
-# Getting Started
+  Tasks Completed
 
-> **Note**: Make sure you have completed the [Set Up Your Environment](https://reactnative.dev/docs/set-up-your-environment) guide before proceeding.
+  1. BottomSheet Component - Image Picker
+  - Created a reusable ImagePickerBottomSheet component using React Native Modal
+  - Options: Take Photo (Camera) and Choose from Gallery
+  - Slide-up animation with backdrop dismiss and cancel button
 
-## Step 1: Start Metro
+  2. Camera & Gallery Permissions
+  - Android: Runtime permissions using PermissionsAndroid (supports Android 10 & 13+)
+    - CAMERA, READ_MEDIA_IMAGES, READ_EXTERNAL_STORAGE
+  - iOS: Added NSCameraUsageDescription and NSPhotoLibraryUsageDescription in Info.plist
+  - Permission flow: Request permission → If denied with "Don't ask again" → Show Settings dialog via
+  Linking.openSettings()
 
-First, you will need to run **Metro**, the JavaScript build tool for React Native.
+  3. Profile Photo Update
+  - Tapping the + badge on profile avatar opens the BottomSheet
+  - Selected image updates the profile photo across the app in real-time
+  - Profile photo is reflected in both ProfileScreen and BottomTab via Redux
 
-To start the Metro dev server, run the following command from the root of your React Native project:
+  4. Redux User Slice (userSlice)
+  - Manages profilePhoto (URI) and bookmarks (array of saved posts)
+  - Actions: setProfilePhoto, addBookmark, removeBookmark, toggleBookmark
+  - Selectors: selectProfilePhoto, selectBookmarks, selectBookmarkCount, selectIsBookmarked
 
-```sh
-# Using npm
-npm start
+  5. Redux Persist with AsyncStorage
+  - Integrated redux-persist + @react-native-async-storage/async-storage
+  - User slice (profile photo & bookmarks) persists across app kills
+  - Wrapped app with PersistGate for rehydration on launch
 
-# OR using Yarn
-yarn start
-```
+  6. Bookmark Integration
+  - Saving a post dispatches toggleBookmark to Redux from both PostItem and PostDetailScreen
+  - Bookmark count badge displayed on profile tab in BottomBar
 
-## Step 2: Build and run your app
+  Packages Added
 
-With Metro running, open a new terminal window/pane from the root of your React Native project, and use one of the following commands to build and run your Android or iOS app:
+  - react-native-image-picker
+  - react-native-permissions
+  - @react-native-async-storage/async-storage
+  - redux-persist
 
-### Android
+  Bug Fixes
 
-```sh
-# Using npm
-npm run android
-
-# OR using Yarn
-yarn android
-```
-
-### iOS
-
-For iOS, remember to install CocoaPods dependencies (this only needs to be run on first clone or after updating native deps).
-
-The first time you create a new project, run the Ruby bundler to install CocoaPods itself:
-
-```sh
-bundle install
-```
-
-Then, and every time you update your native dependencies, run:
-
-```sh
-bundle exec pod install
-```
-
-For more information, please visit [CocoaPods Getting Started guide](https://guides.cocoapods.org/using/getting-started.html).
-
-```sh
-# Using npm
-npm run ios
-
-# OR using Yarn
-yarn ios
-```
-
-If everything is set up correctly, you should see your new app running in the Android Emulator, iOS Simulator, or your connected device.
-
-This is one way to run your app — you can also build it directly from Android Studio or Xcode.
-
-## Step 3: Modify your app
-
-Now that you have successfully run the app, let's make changes!
-
-Open `App.tsx` in your text editor of choice and make some changes. When you save, your app will automatically update and reflect these changes — this is powered by [Fast Refresh](https://reactnative.dev/docs/fast-refresh).
-
-When you want to forcefully reload, for example to reset the state of your app, you can perform a full reload:
-
-- **Android**: Press the <kbd>R</kbd> key twice or select **"Reload"** from the **Dev Menu**, accessed via <kbd>Ctrl</kbd> + <kbd>M</kbd> (Windows/Linux) or <kbd>Cmd ⌘</kbd> + <kbd>M</kbd> (macOS).
-- **iOS**: Press <kbd>R</kbd> in iOS Simulator.
-
-## Congratulations! :tada:
-
-You've successfully run and modified your React Native App. :partying_face:
-
-<img width="300" height="650" alt="Screenshot from 2026-02-11 21-04-31" src="https://github.com/user-attachments/assets/98cc0608-0d0c-4327-9526-192d7878e7b2" />
-
-
-
-### Now what?
-
-- If you want to add this new React Native code to an existing application, check out the [Integration guide](https://reactnative.dev/docs/integration-with-existing-apps).
-- If you're curious to learn more about React Native, check out the [docs](https://reactnative.dev/docs/getting-started).
-
-# Troubleshooting
-
-If you're having issues getting the above steps to work, see the [Troubleshooting](https://reactnative.dev/docs/troubleshooting) page.
-
-# Learn More
-
-To learn more about React Native, take a look at the following resources:
-
-- [React Native Website](https://reactnative.dev) - learn more about React Native.
-- [Getting Started](https://reactnative.dev/docs/environment-setup) - an **overview** of React Native and how setup your environment.
-- [Learn the Basics](https://reactnative.dev/docs/getting-started) - a **guided tour** of the React Native **basics**.
-- [Blog](https://reactnative.dev/blog) - read the latest official React Native **Blog** posts.
-- [`@facebook/react-native`](https://github.com/facebook/react-native) - the Open Source; GitHub **repository** for React Native.
+  - Fixed bookmark count doubling (was counting from both postSlice and userSlice)
+  - Fixed state loss on app kill by persisting user data to AsyncStorage
