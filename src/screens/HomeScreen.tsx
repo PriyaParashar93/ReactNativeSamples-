@@ -19,7 +19,6 @@ import SettingsScreen from "../features/settings/SettingsScreen";
 import type { FeedPost } from "../features/feed/postSlice";
 
 const DRAWER_WIDTH = 270;
-const PROFILE_IMAGE = "https://randomuser.me/api/portraits/women/44.jpg";
 
 type Screen = "feed" | "reels" | "newPost" | "search" | "profile" | "settings" | "postDetail";
 
@@ -185,7 +184,6 @@ const HomeScreen: React.FC = () => {
         <BottomTab
           activeTab={activeTab}
           onTabPress={handleTabPress}
-          profileImage={PROFILE_IMAGE}
         />
       )}
 

@@ -2,16 +2,16 @@ import React from "react";
 import { View, Image, StyleSheet, TouchableOpacity, Text } from "react-native";
 import Icon from "react-native-vector-icons/Ionicons";
 import { useSelector } from "react-redux";
-import { selectSavedPostsCount } from "../features/feed/postSlice";
+import { selectProfilePhoto, selectBookmarkCount } from "../features/user/userSlice";
 
 type Props = {
   activeTab: number;
   onTabPress: (index: number) => void;
-  profileImage?: string;
 };
 
-const BottomTab: React.FC<Props> = ({ activeTab, onTabPress, profileImage }) => {
-  const savedCount = useSelector(selectSavedPostsCount);
+const BottomTab: React.FC<Props> = ({ activeTab, onTabPress }) => {
+  const bookmarkCount = useSelector(selectBookmarkCount);
+  const profileImage = useSelector(selectProfilePhoto);
 
   return (
     <View style={styles.container}>
@@ -43,20 +43,18 @@ const BottomTab: React.FC<Props> = ({ activeTab, onTabPress, profileImage }) => 
         />
       </TouchableOpacity>
 
-      {/* Profile tab — shows avatar thumbnail when on profile tab + saved badge */}
+      {/* Profile tab — always shows avatar thumbnail + saved badge */}
       <TouchableOpacity onPress={() => onTabPress(4)} style={styles.profileTab}>
-        {profileImage && activeTab === 4 ? (
-          <Image source={{ uri: profileImage }} style={styles.profileThumb} />
-        ) : (
-          <Icon
-            name={activeTab === 4 ? "person-circle" : "person-circle-outline"}
-            size={28}
-            color="black"
-          />
-        )}
-        {savedCount > 0 && (
+        <Image
+          source={{ uri: profileImage }}
+          style={[
+            styles.profileThumb,
+            activeTab === 4 && styles.profileThumbActive,
+          ]}
+        />
+        {bookmarkCount > 0 && (
           <View style={styles.badge}>
-            <Text style={styles.badgeText}>{savedCount}</Text>
+            <Text style={styles.badgeText}>{bookmarkCount}</Text>
           </View>
         )}
       </TouchableOpacity>
@@ -83,6 +81,10 @@ const styles = StyleSheet.create({
     width: 28,
     height: 28,
     borderRadius: 14,
+    borderWidth: 1.5,
+    borderColor: "#ddd",
+  },
+  profileThumbActive: {
     borderWidth: 2,
     borderColor: "black",
   },

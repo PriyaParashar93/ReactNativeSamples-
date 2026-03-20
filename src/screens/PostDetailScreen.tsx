@@ -27,6 +27,7 @@ import {
   type FeedPost,
   type Comment,
 } from "../features/feed/postSlice";
+import { toggleBookmark } from "../features/user/userSlice";
 import { usePostInteractionStore } from "../zustand/usePostInteractionStore";
 import type { AppDispatch } from "../store/store";
 
@@ -64,12 +65,19 @@ const PostDetailScreen: React.FC<Props> = ({ post, onBack }) => {
 
   const handleSave = useCallback(() => {
     dispatch(toggleSave(post.id));
+    dispatch(
+      toggleBookmark({
+        id: post.id,
+        postImage: post.postImage,
+        title: post.title,
+      })
+    );
     if (!saved) {
       addToCollection("All Posts", post.id);
     } else {
       removeFromCollection("All Posts", post.id);
     }
-  }, [dispatch, post.id, saved, addToCollection, removeFromCollection]);
+  }, [dispatch, post, saved, addToCollection, removeFromCollection]);
 
   const handleSend = useCallback(() => {
     const text = commentText.trim();

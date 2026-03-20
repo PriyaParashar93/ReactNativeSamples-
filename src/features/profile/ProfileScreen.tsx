@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useCallback, useMemo, useState } from "react";
 import {
   View,
   Text,
@@ -9,9 +9,12 @@ import {
   Dimensions,
 } from "react-native";
 import Icon from "react-native-vector-icons/Ionicons";
+import { useDispatch, useSelector } from "react-redux";
 import CustomButton from "../../Components/CustomButton";
 import StoryItem from "../feed/components/StoryItem";
-import { usePostInteractionStore } from "../../zustand/usePostInteractionStore";
+import ImagePickerBottomSheet from "../../Components/ImagePickerBottomSheet";
+import { setProfilePhoto, selectProfilePhoto, selectBookmarkCount } from "../user/userSlice";
+import type { AppDispatch } from "../../store/store";
 
 const { width } = Dimensions.get("window");
 const GRID_SIZE = Math.floor((width - 4) / 3);
@@ -38,11 +41,21 @@ const gridPhotos = [
 
 const ProfileScreen: React.FC = () => {
   const [activeGridTab, setActiveGridTab] = useState(0);
-  const savedCount = usePostInteractionStore((state) => state.getTotalSavedCount());
+  const [showImagePicker, setShowImagePicker] = useState(false);
+  const dispatch = useDispatch<AppDispatch>();
+  const profileImage = useSelector(selectProfilePhoto);
+  const bookmarkCount = useSelector(selectBookmarkCount);
 
   const savedLabel = useMemo(
-    () => (savedCount > 0 ? `${savedCount} saved` : ""),
-    [savedCount]
+    () => (bookmarkCount > 0 ? `${bookmarkCount} saved` : ""),
+    [bookmarkCount]
+  );
+
+  const handleImageSelected = useCallback(
+    (uri: string) => {
+      dispatch(setProfilePhoto(uri));
+    },
+    [dispatch]
   );
 
   return (
@@ -50,12 +63,16 @@ const ProfileScreen: React.FC = () => {
       {/* ── Profile Section ── */}
       <View style={styles.profileSection}>
         <View style={styles.avatarArea}>
-          <View style={styles.avatarWrapper}>
-            <Image source={{ uri: PROFILE_IMAGE }} style={styles.avatar} />
+          <TouchableOpacity
+            style={styles.avatarWrapper}
+            activeOpacity={0.8}
+            onPress={() => setShowImagePicker(true)}
+          >
+            <Image source={{ uri: profileImage }} style={styles.avatar} />
             <View style={styles.plusBadge}>
               <Icon name="add" size={13} color="white" />
             </View>
-          </View>
+          </TouchableOpacity>
         </View>
 
         <View style={styles.statsArea}>
@@ -170,6 +187,12 @@ const ProfileScreen: React.FC = () => {
       </View>
 
       <View style={{ height: 16 }} />
+
+      <ImagePickerBottomSheet
+        visible={showImagePicker}
+        onClose={() => setShowImagePicker(false)}
+        onImageSelected={handleImageSelected}
+      />
     </ScrollView>
   );
 };

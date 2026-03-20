@@ -9,6 +9,7 @@ import {
   selectIsSaved,
   selectLikeCount,
 } from "../postSlice";
+import { toggleBookmark } from "../../user/userSlice";
 import { usePostInteractionStore } from "../../../zustand/usePostInteractionStore";
 import type { AppDispatch } from "../../../store/store";
 
@@ -43,12 +44,19 @@ const PostItem: React.FC<Props> = ({
 
   const handleSave = useCallback(() => {
     dispatch(toggleSave(postId));
+    dispatch(
+      toggleBookmark({
+        id: postId,
+        postImage: postImage,
+        title: title ?? "",
+      })
+    );
     if (!saved) {
       addToCollection("All Posts", postId);
     } else {
       removeFromCollection("All Posts", postId);
     }
-  }, [dispatch, postId, saved, addToCollection, removeFromCollection]);
+  }, [dispatch, postId, postImage, title, saved, addToCollection, removeFromCollection]);
 
   return (
     <View style={styles.container}>
