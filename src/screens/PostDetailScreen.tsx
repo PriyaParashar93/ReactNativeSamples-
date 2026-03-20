@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
   FlatList,
@@ -12,21 +12,24 @@ import {
   View,
 } from "react-native";
 import Icon from "react-native-vector-icons/Ionicons";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  toggleLike,
+  toggleSave,
+  addComment,
+  fetchComments,
+  initLikeCount,
+  selectIsLiked,
+  selectIsSaved,
+  selectLikeCount,
+  selectCommentsByPostId,
+  selectCommentsLoading,
+  type FeedPost,
+  type Comment,
+} from "../features/feed/postSlice";
+import { usePostInteractionStore } from "../zustand/usePostInteractionStore";
+import type { AppDispatch } from "../store/store";
 
-import type { FeedPost } from "./HomeScreen";
-
-/* ── API types ── */
-type ApiComment = {
-  postId: number;
-  id: number;
-  name: string;
-  email: string;
-  body: string;
-};
-
-type Comment = ApiComment & { isLocal?: boolean };
-
-/* ── Props ── */
 type Props = {
   post: FeedPost;
   onBack: () => void;
@@ -35,37 +38,40 @@ type Props = {
 const MY_AVATAR = "https://randomuser.me/api/portraits/women/44.jpg";
 
 const PostDetailScreen: React.FC<Props> = ({ post, onBack }) => {
-  const [comments, setComments] = useState<Comment[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [commentText, setCommentText] = useState("");
-  const [liked, setLiked] = useState(false);
-  const [saved, setSaved] = useState(false);
-  const [likeCount, setLikeCount] = useState(Math.floor(Math.random() * 900) + 100);
+  const dispatch = useDispatch<AppDispatch>();
+  const liked = useSelector(selectIsLiked(post.id));
+  const saved = useSelector(selectIsSaved(post.id));
+  const likeCount = useSelector(selectLikeCount(post.id));
+  const comments = useSelector(selectCommentsByPostId(post.id));
+  const commentsLoading = useSelector(selectCommentsLoading(post.id));
+  const { addToCollection, removeFromCollection } = usePostInteractionStore();
 
+  const [commentText, setCommentText] = useState("");
   const flatListRef = useRef<FlatList<Comment>>(null);
 
   useEffect(() => {
-    fetch(
-      `https://jsonplaceholder.typicode.com/comments?postId=${post.id}`
-    )
-      .then((res) => {
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        return res.json() as Promise<ApiComment[]>;
-      })
-      .then(setComments)
-      .catch((err: Error) => setError(err.message))
-      .finally(() => setLoading(false));
-  }, [post.id]);
+    // Initialize like count with a random value if not set
+    dispatch(initLikeCount({ postId: post.id, count: Math.floor(Math.random() * 900) + 100 }));
+    // Fetch comments from API
+    if (comments.length === 0) {
+      dispatch(fetchComments(post.id));
+    }
+  }, [dispatch, post.id]);
 
-  const handleLike = () => {
-    setLiked((prev) => {
-      setLikeCount((c) => (prev ? c - 1 : c + 1));
-      return !prev;
-    });
-  };
+  const handleLike = useCallback(() => {
+    dispatch(toggleLike(post.id));
+  }, [dispatch, post.id]);
 
-  const handleSend = () => {
+  const handleSave = useCallback(() => {
+    dispatch(toggleSave(post.id));
+    if (!saved) {
+      addToCollection("All Posts", post.id);
+    } else {
+      removeFromCollection("All Posts", post.id);
+    }
+  }, [dispatch, post.id, saved, addToCollection, removeFromCollection]);
+
+  const handleSend = useCallback(() => {
     const text = commentText.trim();
     if (!text) return;
 
@@ -78,18 +84,16 @@ const PostDetailScreen: React.FC<Props> = ({ post, onBack }) => {
       isLocal: true,
     };
 
-    setComments((prev) => [...prev, newComment]);
+    dispatch(addComment({ postId: post.id, comment: newComment }));
     setCommentText("");
     setTimeout(
       () => flatListRef.current?.scrollToEnd({ animated: true }),
       150
     );
-  };
+  }, [commentText, dispatch, post.id]);
 
-  /* ── Post header rendered inside FlatList ListHeaderComponent ── */
   const PostHeader = () => (
     <>
-      {/* User row */}
       <View style={styles.userRow}>
         <Image source={{ uri: post.userImage }} style={styles.avatar} />
         <View style={styles.userInfo}>
@@ -101,10 +105,8 @@ const PostDetailScreen: React.FC<Props> = ({ post, onBack }) => {
         </TouchableOpacity>
       </View>
 
-      {/* Post image */}
       <Image source={{ uri: post.postImage }} style={styles.postImage} />
 
-      {/* Actions */}
       <View style={styles.actionRow}>
         <View style={styles.leftActions}>
           <TouchableOpacity style={styles.iconBtn} onPress={handleLike}>
@@ -121,7 +123,7 @@ const PostDetailScreen: React.FC<Props> = ({ post, onBack }) => {
             <Icon name="paper-plane-outline" size={24} color="black" />
           </TouchableOpacity>
         </View>
-        <TouchableOpacity onPress={() => setSaved((v) => !v)}>
+        <TouchableOpacity onPress={handleSave}>
           <Icon
             name={saved ? "bookmark" : "bookmark-outline"}
             size={24}
@@ -130,38 +132,28 @@ const PostDetailScreen: React.FC<Props> = ({ post, onBack }) => {
         </TouchableOpacity>
       </View>
 
-      {/* Like count */}
       <Text style={styles.likeCount}>{likeCount.toLocaleString()} likes</Text>
 
-      {/* Caption */}
       <Text style={styles.caption}>
         <Text style={styles.bold}>{post.username} </Text>
         {post.title}
       </Text>
 
-      {/* Body */}
       <Text style={styles.bodyText}>{post.body}</Text>
 
-      {/* Comments section header */}
       <View style={styles.commentsDivider}>
         <Icon name="chatbubble-outline" size={15} color="#888" />
         <Text style={styles.commentsTitle}>
-          {loading
+          {commentsLoading
             ? "Loading comments…"
-            : error
-            ? "Comments unavailable"
             : `${comments.length} Comments`}
         </Text>
       </View>
 
-      {loading && (
+      {commentsLoading && (
         <View style={styles.center}>
           <ActivityIndicator size="small" color="#0095f6" />
         </View>
-      )}
-
-      {error && !loading && (
-        <Text style={styles.errorText}>{error}</Text>
       )}
     </>
   );
@@ -172,7 +164,6 @@ const PostDetailScreen: React.FC<Props> = ({ post, onBack }) => {
       behavior={Platform.OS === "ios" ? "padding" : "height"}
       keyboardVerticalOffset={Platform.OS === "ios" ? 90 : 0}
     >
-      {/* ── Fixed header ── */}
       <View style={styles.header}>
         <TouchableOpacity
           onPress={onBack}
@@ -185,7 +176,6 @@ const PostDetailScreen: React.FC<Props> = ({ post, onBack }) => {
         <View style={styles.backBtn} />
       </View>
 
-      {/* ── Scrollable content (post + comments) ── */}
       <FlatList
         ref={flatListRef}
         data={comments}
@@ -228,7 +218,6 @@ const PostDetailScreen: React.FC<Props> = ({ post, onBack }) => {
         keyboardShouldPersistTaps="handled"
       />
 
-      {/* ── Bottom comment input ── */}
       <View style={styles.inputBar}>
         <Image source={{ uri: MY_AVATAR }} style={styles.inputAvatar} />
         <TextInput
@@ -258,245 +247,67 @@ const PostDetailScreen: React.FC<Props> = ({ post, onBack }) => {
 export default PostDetailScreen;
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "white",
-  },
-
-  /* ── Header ── */
+  container: { flex: 1, backgroundColor: "white" },
   header: {
-    height: 55,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    paddingHorizontal: 12,
-    borderBottomWidth: 0.5,
-    borderBottomColor: "#ddd",
-    backgroundColor: "white",
+    height: 55, flexDirection: "row", alignItems: "center",
+    justifyContent: "space-between", paddingHorizontal: 12,
+    borderBottomWidth: 0.5, borderBottomColor: "#ddd", backgroundColor: "white",
   },
-  backBtn: {
-    width: 36,
-    alignItems: "center",
-  },
-  headerTitle: {
-    fontSize: 17,
-    fontWeight: "700",
-    color: "black",
-  },
-
-  /* ── Post section ── */
-  userRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-  },
-  avatar: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    marginRight: 10,
-  },
-  userInfo: {
-    flex: 1,
-  },
-  username: {
-    fontSize: 14,
-    fontWeight: "700",
-    color: "black",
-  },
-  locationText: {
-    fontSize: 11,
-    color: "#888",
-    marginTop: 1,
-  },
-  postImage: {
-    width: "100%",
-    height: 380,
-    backgroundColor: "#f0f0f0",
-  },
+  backBtn: { width: 36, alignItems: "center" },
+  headerTitle: { fontSize: 17, fontWeight: "700", color: "black" },
+  userRow: { flexDirection: "row", alignItems: "center", paddingHorizontal: 12, paddingVertical: 10 },
+  avatar: { width: 36, height: 36, borderRadius: 18, marginRight: 10 },
+  userInfo: { flex: 1 },
+  username: { fontSize: 14, fontWeight: "700", color: "black" },
+  locationText: { fontSize: 11, color: "#888", marginTop: 1 },
+  postImage: { width: "100%", height: 380, backgroundColor: "#f0f0f0" },
   actionRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    paddingHorizontal: 12,
-    paddingTop: 10,
+    flexDirection: "row", justifyContent: "space-between",
+    alignItems: "center", paddingHorizontal: 12, paddingTop: 10,
   },
-  leftActions: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  iconBtn: {
-    marginRight: 14,
-  },
-  likeCount: {
-    paddingHorizontal: 12,
-    paddingTop: 8,
-    fontSize: 13,
-    fontWeight: "700",
-    color: "black",
-  },
-  caption: {
-    paddingHorizontal: 12,
-    paddingTop: 5,
-    fontSize: 14,
-    color: "#111",
-    lineHeight: 20,
-  },
-  bold: {
-    fontWeight: "700",
-  },
-  bodyText: {
-    paddingHorizontal: 12,
-    paddingTop: 4,
-    paddingBottom: 8,
-    fontSize: 13,
-    color: "#555",
-    lineHeight: 19,
-  },
-
-  /* ── Comments header ── */
+  leftActions: { flexDirection: "row", alignItems: "center" },
+  iconBtn: { marginRight: 14 },
+  likeCount: { paddingHorizontal: 12, paddingTop: 8, fontSize: 13, fontWeight: "700", color: "black" },
+  caption: { paddingHorizontal: 12, paddingTop: 5, fontSize: 14, color: "#111", lineHeight: 20 },
+  bold: { fontWeight: "700" },
+  bodyText: { paddingHorizontal: 12, paddingTop: 4, paddingBottom: 8, fontSize: 13, color: "#555", lineHeight: 19 },
   commentsDivider: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
-    paddingHorizontal: 12,
-    paddingVertical: 12,
-    borderTopWidth: StyleSheet.hairlineWidth,
-    borderTopColor: "#e5e5e5",
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: "#e5e5e5",
+    flexDirection: "row", alignItems: "center", gap: 6,
+    paddingHorizontal: 12, paddingVertical: 12,
+    borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: "#e5e5e5",
+    borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: "#e5e5e5",
     backgroundColor: "#fafafa",
   },
-  commentsTitle: {
-    fontSize: 13,
-    fontWeight: "600",
-    color: "#555",
-  },
-  center: {
-    paddingVertical: 20,
-    alignItems: "center",
-  },
-  errorText: {
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    fontSize: 13,
-    color: "#e53935",
-  },
-
-  /* ── Comment rows ── */
-  listContent: {
-    paddingBottom: 12,
-  },
-  commentRow: {
-    flexDirection: "row",
-    alignItems: "flex-start",
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-  },
-  localCommentRow: {
-    backgroundColor: "#f0f7ff",
-  },
-  commentAvatar: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    marginRight: 10,
-    marginTop: 2,
-  },
-  commentAvatarPlaceholder: {
-    width: 36,
-    height: 36,
-    marginRight: 10,
-    marginTop: 2,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  commentContent: {
-    flex: 1,
-  },
-  commentTopRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    flexWrap: "wrap",
-    gap: 6,
-    marginBottom: 3,
-  },
-  commentName: {
-    fontSize: 13,
-    fontWeight: "700",
-    color: "#111",
-  },
-  commentEmail: {
-    fontSize: 11,
-    color: "#0095f6",
-  },
-  commentBody: {
-    fontSize: 13,
-    color: "#333",
-    lineHeight: 18,
-  },
+  commentsTitle: { fontSize: 13, fontWeight: "600", color: "#555" },
+  center: { paddingVertical: 20, alignItems: "center" },
+  listContent: { paddingBottom: 12 },
+  commentRow: { flexDirection: "row", alignItems: "flex-start", paddingHorizontal: 12, paddingVertical: 10 },
+  localCommentRow: { backgroundColor: "#f0f7ff" },
+  commentAvatar: { width: 36, height: 36, borderRadius: 18, marginRight: 10, marginTop: 2 },
+  commentAvatarPlaceholder: { width: 36, height: 36, marginRight: 10, marginTop: 2, justifyContent: "center", alignItems: "center" },
+  commentContent: { flex: 1 },
+  commentTopRow: { flexDirection: "row", alignItems: "center", flexWrap: "wrap", gap: 6, marginBottom: 3 },
+  commentName: { fontSize: 13, fontWeight: "700", color: "#111" },
+  commentEmail: { fontSize: 11, color: "#0095f6" },
+  commentBody: { fontSize: 13, color: "#333", lineHeight: 18 },
   localBadge: {
-    alignSelf: "flex-start",
-    backgroundColor: "#0095f6",
-    borderRadius: 6,
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-    marginLeft: 6,
-    marginTop: 4,
+    alignSelf: "flex-start", backgroundColor: "#0095f6", borderRadius: 6,
+    paddingHorizontal: 6, paddingVertical: 2, marginLeft: 6, marginTop: 4,
   },
-  localBadgeText: {
-    fontSize: 10,
-    color: "white",
-    fontWeight: "600",
-  },
-  separator: {
-    height: StyleSheet.hairlineWidth,
-    backgroundColor: "#f0f0f0",
-    marginLeft: 58,
-  },
-
-  /* ── Comment input bar ── */
+  localBadgeText: { fontSize: 10, color: "white", fontWeight: "600" },
+  separator: { height: StyleSheet.hairlineWidth, backgroundColor: "#f0f0f0", marginLeft: 58 },
   inputBar: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-    borderTopWidth: StyleSheet.hairlineWidth,
-    borderTopColor: "#ddd",
-    backgroundColor: "white",
-    gap: 10,
+    flexDirection: "row", alignItems: "center", paddingHorizontal: 12,
+    paddingVertical: 10, borderTopWidth: StyleSheet.hairlineWidth,
+    borderTopColor: "#ddd", backgroundColor: "white", gap: 10,
   },
-  inputAvatar: {
-    width: 34,
-    height: 34,
-    borderRadius: 17,
-  },
+  inputAvatar: { width: 34, height: 34, borderRadius: 17 },
   input: {
-    flex: 1,
-    minHeight: 38,
-    maxHeight: 100,
-    backgroundColor: "#f5f5f5",
-    borderRadius: 20,
-    paddingHorizontal: 14,
-    paddingVertical: 8,
-    fontSize: 14,
-    color: "black",
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: "#ddd",
+    flex: 1, minHeight: 38, maxHeight: 100, backgroundColor: "#f5f5f5",
+    borderRadius: 20, paddingHorizontal: 14, paddingVertical: 8,
+    fontSize: 14, color: "black", borderWidth: StyleSheet.hairlineWidth, borderColor: "#ddd",
   },
-  sendBtn: {
-    paddingHorizontal: 14,
-    paddingVertical: 8,
-    backgroundColor: "#0095f6",
-    borderRadius: 18,
-  },
-  sendBtnDisabled: {
-    backgroundColor: "#b3d9fb",
-  },
-  sendBtnText: {
-    fontSize: 14,
-    fontWeight: "700",
-    color: "white",
-  },
+  sendBtn: { paddingHorizontal: 14, paddingVertical: 8, backgroundColor: "#0095f6", borderRadius: 18 },
+  sendBtnDisabled: { backgroundColor: "#b3d9fb" },
+  sendBtnText: { fontSize: 14, fontWeight: "700", color: "white" },
 });

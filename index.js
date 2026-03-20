@@ -2,17 +2,17 @@
  * @format
  */
 
+import React from 'react';
 import { AppRegistry } from 'react-native';
+import { Provider } from 'react-redux';
 import { name as appName } from './app.json';
-
+import { store } from './src/store/store';
 import HomeScreen from './src/screens/HomeScreen';
 
-AppRegistry.registerComponent(appName, () => HomeScreen);
+const App = () => (
+  <Provider store={store}>
+    <HomeScreen />
+  </Provider>
+);
 
-// import alignmentScreen from './src/screens/alignmentScreen';
-
-// AppRegistry.registerComponent(appName, () => alignmentScreen);
-
-// import componentScreen from './src/screens/componentScreen';
-
-// AppRegistry.registerComponent(appName, () => componentScreen);
+AppRegistry.registerComponent(appName, () => App);
